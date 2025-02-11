@@ -16,9 +16,9 @@ export type Animal = {
     name: string
     species: Species
 
-    happinessPercent: number
-    hungerPercent: number
-    sleepinessPercent: number
+    initialHappinessPercent: number
+    initialHungerPercent: number
+    initialSleepinessPercent: number
 
     rates: Rates
 

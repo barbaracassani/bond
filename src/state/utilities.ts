@@ -27,8 +27,8 @@ export const createAnimal = ({ species, name, id }: Partial<Animal>): Partial<An
         name,
         species,
         rates: rates[species!],
-        sleepinessPercent: 50,
-        happinessPercent: 50,
-        hungerPercent: 50,
+        initialSleepinessPercent: 50,
+        initialHappinessPercent: 50,
+        initialHungerPercent: 50,
     }
 }
