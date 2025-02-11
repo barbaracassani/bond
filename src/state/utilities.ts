@@ -1,9 +1,34 @@
-import { Animal } from '../types/animals.ts'
+import {Animal, Rates, Species} from '../types/animals.ts'
 
-export const createAnimal = ({ name, species, id }: Partial<Animal>) => {
+const rates: Record<Species, Rates> = {
+    [Species.Poodle]: {
+        happinessDecay: 50,
+        hungerIncrease: 90,
+        sleepinessIncrease: 10,
+        acceleratedDecayFactor: 50
+    },
+    [Species.Appy]: {
+        happinessDecay: 10,
+        hungerIncrease: 40,
+        sleepinessIncrease: 70,
+        acceleratedDecayFactor: 40
+    },
+    [Species.Bengali]: {
+        happinessDecay: 5,
+        hungerIncrease: 85,
+        sleepinessIncrease: 80,
+        acceleratedDecayFactor: 20
+    }
+}
+
+export const createAnimal = ({ species, name, id }: Partial<Animal>): Partial<Animal> => {
     return {
+        id,
         name,
         species,
-        id,
+        rates: rates[species!],
+        sleepinessPercent: 50,
+        happinessPercent: 50,
+        hungerPercent: 50,
     }
 }

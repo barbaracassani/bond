@@ -6,7 +6,6 @@ import { createAnimal } from '../state/utilities.ts'
 import { v4 as uuid } from 'uuid'
 
 const AnimalSpawner: FC = () => {
-    // todo remove partial
     const [animals, setAnimals] = useState<Partial<Animal>[]>([])
 
     const [species, setSpecies] = useState<Species | null>()

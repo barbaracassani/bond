@@ -5,10 +5,10 @@ export enum Species {
 }
 
 export type Rates = {
-    happinessDecay: number
-    hungerIncrease: number
-    sleepinessIncrease: number
-    acceleratedDecayFactor: number
+    readonly happinessDecay: number
+    readonly hungerIncrease: number
+    readonly sleepinessIncrease: number
+    readonly acceleratedDecayFactor: number
 }
 
 export type Animal = {
