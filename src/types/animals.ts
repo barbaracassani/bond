@@ -24,14 +24,10 @@ export type Animal = {
 
     rates: Rates
 
-    feed$: Observable<void>
-    feed: () => void
-    sleep$: Observable<void>
-    rest: () => void
-    happiness$: Observable<void>
-    makeHappy: () => void
+    readonly feed$: Observable<void>
+    readonly feed: () => void
+    readonly sleep$: Observable<void>
+    readonly rest: () => void
+    readonly happiness$: Observable<void>
+    readonly makeHappy: () => void
 }
-
-export type Appy = Animal & { species: Species.Appy }
-export type Poodle = Animal & { species: Species.Poodle }
-export type Bengali = Animal & { species: Species.Bengali }

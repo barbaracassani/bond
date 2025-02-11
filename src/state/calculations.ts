@@ -24,7 +24,6 @@ export const calculateHappinessDecay = (
         sleep >= ACCELLERATED_DECAY_FROM
             ? animal.rates.acceleratedDecayFactor
             : 1
-
     return (
         (BASE_DECAY_PER_INTERVAL / 100) *
         animal.rates.happinessDecay *
