@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs'
+
 export enum Species {
     Appy = 'Appy',
     Bengali = 'Bengali',
@@ -22,9 +24,12 @@ export type Animal = {
 
     rates: Rates
 
-    play: () => void
+    feed$: Observable<void>
     feed: () => void
+    sleep$: Observable<void>
     rest: () => void
+    happiness$: Observable<void>
+    makeHappy: () => void
 }
 
 export type Appy = Animal & { species: Species.Appy }

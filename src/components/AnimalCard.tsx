@@ -1,7 +1,6 @@
 import { FC } from 'react'
 import { merge, Observable, tap, withLatestFrom } from 'rxjs'
 import { scan, map, startWith } from 'rxjs/operators'
-import { createSignal } from '@react-rxjs/utils'
 import { bind } from '@react-rxjs/core'
 import { Animal } from '../types/animals.ts'
 import {
@@ -9,10 +8,6 @@ import {
     BASE_REPLENISH,
     tick$,
 } from '../state/observables.ts'
-
-const [feed$, feed] = createSignal()
-const [sleep$, rest] = createSignal()
-const [happiness$, makeHappy] = createSignal()
 
 const calculateFeedDecay = (animal: Animal): number => {
     return (BASE_DECAY_PER_INTERVAL / 100) * animal.rates.hungerIncrease
@@ -40,7 +35,7 @@ const calculateHappinessDecay = (
 const feedLoop$ = (animal: Animal): Observable<number> => {
     return merge(
         tick$.pipe(map(() => calculateFeedDecay(animal))),
-        feed$.pipe(map(() => -BASE_REPLENISH))
+        animal.feed$.pipe(map(() => -BASE_REPLENISH))
     ).pipe(
         scan(
             (level, change) => Math.min(100, Math.max(0, level + change)),
@@ -53,7 +48,7 @@ const feedLoop$ = (animal: Animal): Observable<number> => {
 const sleepLoop$ = (animal: Animal): Observable<number> => {
     return merge(
         tick$.pipe(map(() => calculateRestDecay(animal))),
-        sleep$.pipe(map(() => -BASE_REPLENISH))
+        animal.sleep$.pipe(map(() => -BASE_REPLENISH))
     ).pipe(
         tap((a) => {
             console.info('sleep diff', a)
@@ -75,7 +70,7 @@ const happinessLoop$ = (animal: Animal): Observable<number> => {
                 return -decay
             })
         ),
-        happiness$.pipe(map(() => BASE_REPLENISH))
+        animal.happiness$.pipe(map(() => BASE_REPLENISH))
     ).pipe(
         scan(
             (level, change) => Math.min(100, Math.max(0, level + change)),
@@ -104,9 +99,9 @@ const AnimalCard: FC<{
             Current hunger: {hunger.toFixed(2)}
             Current sleepiness level: {sleep.toFixed(2)}
             Current happiness level: {happiness.toFixed(2)}
-            <button onClick={feed}>Feed</button>
-            <button onClick={rest}>Rest</button>
-            <button onClick={makeHappy}>Play</button>
+            <button onClick={animal.feed}>Feed</button>
+            <button onClick={animal.rest}>Rest</button>
+            <button onClick={animal.makeHappy}>Play</button>
         </div>
     )
 }

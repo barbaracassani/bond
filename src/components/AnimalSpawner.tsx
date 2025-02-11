@@ -6,7 +6,7 @@ import { createAnimal } from '../state/utilities.ts'
 import { v4 as uuid } from 'uuid'
 
 const AnimalSpawner: FC = () => {
-    const [animals, setAnimals] = useState<Partial<Animal>[]>([])
+    const [animals, setAnimals] = useState<Animal[]>([])
 
     const [species, setSpecies] = useState<Species | null>()
     const [name, setName] = useState<string>('')
@@ -16,7 +16,7 @@ const AnimalSpawner: FC = () => {
             name,
             species,
             id: uuid(),
-        } as Partial<Animal>)
+        } as Pick<Animal, 'name' | 'id' | 'species'>)
         setAnimals((prev) => [...prev, newAnimal])
         setName('')
         setSpecies(null)
