@@ -26,6 +26,20 @@ const createMockAnimal = (): Partial<
 })
 
 describe('feedLoop$', () => {
+    it('should start from the baseline', async () => {
+        const animal = createMockAnimal()
+        const hungerValues: number[] = []
+
+        const subscription = feedLoop$(animal as Animal).subscribe((hunger) => {
+            hungerValues.push(hunger)
+        })
+
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        subscription.unsubscribe()
+
+        expect(hungerValues).toEqual([50])
+    })
     it('should increase hunger over time', async () => {
         const animal = createMockAnimal()
         const hungerValues: number[] = []
@@ -44,7 +58,42 @@ describe('feedLoop$', () => {
         expect(hungerValues.length).toBeGreaterThan(1)
         expect(hungerValues).toEqual([50, 50.5, 51])
     })
+    it('should not increase beyond 100', async () => {
+        const animal = createMockAnimal()
+        const hungerValues: number[] = []
 
+        const subscription = feedLoop$(animal as Animal).subscribe((hunger) => {
+            hungerValues.push(hunger)
+        })
+
+        new Array(110).fill('').forEach(() => {
+            ;(tick$ as unknown as Subject<void>).next()
+        })
+
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        subscription.unsubscribe()
+        expect(hungerValues[hungerValues.length - 1]).toEqual(100)
+    })
+    it('should not decrease past 0', async () => {
+        const animal = createMockAnimal()
+        const hungerValues: number[] = []
+
+        const subscription = feedLoop$(animal as Animal).subscribe((hunger) => {
+            hungerValues.push(hunger)
+        })
+        animal.feed$!.next();
+        animal.feed$!.next();
+        animal.feed$!.next();
+        animal.feed$!.next();
+        animal.feed$!.next();
+        animal.feed$!.next();
+
+        await new Promise((resolve) => setTimeout(resolve, 100))
+
+        subscription.unsubscribe()
+        expect(hungerValues[hungerValues.length - 1]).toEqual(0)
+    })
     it('should decrease hunger when feeding', async () => {
         const animal = createMockAnimal()
         const hungerValues: number[] = []
@@ -60,7 +109,6 @@ describe('feedLoop$', () => {
         expect(hungerValues[hungerValues.length - 1]).toEqual(
             animal.initialHungerPercent! - BASE_REPLENISH
         )
-
         ;(tick$ as unknown as Subject<void>).next()
         subscription.unsubscribe()
         expect(hungerValues[hungerValues.length - 1]).toEqual(
