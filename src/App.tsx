@@ -5,7 +5,6 @@ import { Subscribe } from '@react-rxjs/core'
 function App() {
     return (
         <div className="animal-page">
-            <button>Add Animal</button>
             <Subscribe>
                 <div className="animal-wrapper">
                     <AnimalSpawner />
