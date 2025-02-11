@@ -1,4 +1,4 @@
-import { interval, merge, Observable, withLatestFrom } from 'rxjs'
+import {interval, merge, Observable, Subject, withLatestFrom} from 'rxjs'
 import { Animal } from '../types/animals.ts'
 import { map, scan, startWith } from 'rxjs/operators'
 import {
@@ -13,7 +13,8 @@ export const BASE_DECAY_PER_INTERVAL = 5
 export const BASE_REPLENISH = 25
 export const ACCELLERATED_DECAY_FROM = 70
 
-export const tick$ = interval(TIME_TICK)
+export const tick$ =
+    import.meta.env.MODE === 'test' ? new Subject<number>() : interval(TIME_TICK)
 
 export const feedLoop$ = (animal: Animal): Observable<number> => {
     return merge(
