@@ -1,8 +1,9 @@
-import {Animal} from '../types/animals.ts';
+import { Animal } from '../types/animals.ts'
 
-export const createAnimal = ({name, species}: Partial<Animal>) => {
-    return  {
+export const createAnimal = ({ name, species, id }: Partial<Animal>) => {
+    return {
         name,
-        species
+        species,
+        id,
     }
 }

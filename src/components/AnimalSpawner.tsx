@@ -3,6 +3,8 @@ import { Animal, Species } from '../types/animals.ts'
 import AnimalCard from './AnimalCard.tsx'
 import { createAnimal } from '../state/utilities.ts'
 
+import { v4 as uuid } from 'uuid'
+
 const AnimalSpawner: FC = () => {
     // todo remove partial
     const [animals, setAnimals] = useState<Partial<Animal>[]>([])
@@ -11,11 +13,22 @@ const AnimalSpawner: FC = () => {
     const [name, setName] = useState<string>('')
 
     const addAnimal = () => {
-        const newAnimal = createAnimal({ name, species } as Partial<Animal>)
+        const newAnimal = createAnimal({
+            name,
+            species,
+            id: uuid(),
+        } as Partial<Animal>)
         setAnimals((prev) => [...prev, newAnimal])
         setName('')
         setSpecies(null)
     }
+
+    const removeAnimal = (id: string) => {
+        setAnimals((prevState) => {
+            return prevState.filter((a) => a.id !== id)
+        })
+    }
+
     return (
         <div>
             <h1>Animal Manager</h1>I want to create a
@@ -43,7 +56,13 @@ const AnimalSpawner: FC = () => {
             </button>
             <div className="animal-list">
                 {animals.map((animal) => (
-                    <AnimalCard key={animal.id} animal={animal} />
+                    <AnimalCard
+                        removeHandler={() => {
+                            removeAnimal(animal.id!)
+                        }}
+                        key={animal.id}
+                        animal={animal}
+                    />
                 ))}
             </div>
         </div>
