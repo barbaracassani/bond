@@ -6,19 +6,19 @@ const rates: Record<Species, Rates> = {
         happinessDecay: 50,
         hungerIncrease: 90,
         sleepinessIncrease: 10,
-        acceleratedDecayFactor: 50,
+        acceleratedDecayFactor: 1.5,
     },
     [Species.Appy]: {
         happinessDecay: 10,
         hungerIncrease: 40,
         sleepinessIncrease: 70,
-        acceleratedDecayFactor: 40,
+        acceleratedDecayFactor: 1.4,
     },
     [Species.Bengali]: {
         happinessDecay: 5,
         hungerIncrease: 85,
         sleepinessIncrease: 80,
-        acceleratedDecayFactor: 20,
+        acceleratedDecayFactor: 1.2,
     },
 }
 
@@ -27,9 +27,9 @@ export const createAnimal = ({
     name,
     id,
 }: Pick<Animal, 'name' | 'id' | 'species'>): Animal => {
-    const [feed$, feed] = createSignal<number>()
-    const [sleep$, rest] = createSignal<number>()
-    const [happiness$, makeHappy] = createSignal<number>()
+    const [feed$, feed] = createSignal<void>()
+    const [sleep$, rest] = createSignal<void>()
+    const [happiness$, makeHappy] = createSignal<void>()
     return {
         id,
         name,
