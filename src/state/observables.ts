@@ -1,4 +1,11 @@
-import { interval, merge, Observable, Subject, withLatestFrom } from 'rxjs'
+import {
+    combineLatest,
+    interval,
+    merge,
+    Observable,
+    Subject,
+    withLatestFrom,
+} from 'rxjs'
 import { Animal } from '../types/animals.ts'
 import { map, scan, startWith } from 'rxjs/operators'
 import {
@@ -64,5 +71,16 @@ export const happinessLoop$ = (
             animal.initialHappinessPercent
         ),
         startWith(animal.initialHappinessPercent)
+    )
+}
+
+export const combinedLoop$ = (animal: Animal) => {
+    const hunger$ = feedLoop$(animal)
+    const sleep$ = sleepLoop$(animal)
+    const happiness$ = happinessLoop$(animal, hunger$, sleep$)
+    // note of the author: it should be possible to subscribe to tick$ here instead of inside the single observables
+    // This would reduce the number of emissions and therefore the performance.
+    return combineLatest([hunger$, sleep$, happiness$]).pipe(
+        map(([hunger, sleep, happiness]) => ({ hunger, sleep, happiness }))
     )
 }

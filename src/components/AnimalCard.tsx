@@ -1,19 +1,7 @@
 import { FC } from 'react'
 import { bind } from '@react-rxjs/core'
 import { Animal } from '../types/animals.ts'
-import { feedLoop$, happinessLoop$, sleepLoop$ } from '../state/observables.ts'
-import { combineLatest } from 'rxjs'
-import { map } from 'rxjs/operators'
-
-const combinedLoop$ = (animal: Animal) => {
-    const hunger$ = feedLoop$(animal)
-    const sleep$ = sleepLoop$(animal)
-    const happiness$ = happinessLoop$(animal, hunger$, sleep$)
-
-    return combineLatest([hunger$, sleep$, happiness$]).pipe(
-        map(([hunger, sleep, happiness]) => ({ hunger, sleep, happiness }))
-    )
-}
+import { combinedLoop$ } from '../state/observables.ts'
 
 const [useAnimalState] = bind(combinedLoop$, {
     hunger: 0,

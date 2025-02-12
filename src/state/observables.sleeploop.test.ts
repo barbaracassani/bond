@@ -2,6 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { Subject } from 'rxjs'
 import { sleepLoop$, BASE_REPLENISH, tick$ } from './observables'
 import { Animal, Species } from '../types/animals'
+import { isSubject } from '../types/tests.ts'
+
+const tick = () => {
+    if (isSubject(tick$)) {
+        return tick$.next()
+    }
+}
 
 const createMockAnimal = (): Partial<
     Omit<Animal, 'feed$' | 'sleep$' | 'happiness$'> & {
@@ -50,8 +57,8 @@ describe('sleepLoop$', () => {
             }
         )
 
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+        tick()
 
         subscription.unsubscribe()
 
@@ -68,7 +75,7 @@ describe('sleepLoop$', () => {
         )
 
         new Array(110).fill('').forEach(() => {
-            ;(tick$ as unknown as Subject<void>).next()
+            return tick()
         })
 
         subscription.unsubscribe()
@@ -108,7 +115,8 @@ describe('sleepLoop$', () => {
         expect(tirednessValues[tirednessValues.length - 1]).toEqual(
             animal.initialSleepinessPercent! - BASE_REPLENISH
         )
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+
         subscription.unsubscribe()
         expect(tirednessValues[tirednessValues.length - 1]).toEqual(
             animal.initialSleepinessPercent! - BASE_REPLENISH + 0.5

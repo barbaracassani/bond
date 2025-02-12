@@ -2,6 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { Subject } from 'rxjs'
 import { feedLoop$, BASE_REPLENISH, tick$ } from './observables'
 import { Animal, Species } from '../types/animals'
+import { isSubject } from '../types/tests.ts'
+
+const tick = () => {
+    if (isSubject(tick$)) {
+        return tick$.next()
+    }
+}
 
 const createMockAnimal = (): Partial<
     Omit<Animal, 'feed$' | 'sleep$' | 'happiness$'> & {
@@ -46,8 +53,8 @@ describe('feedLoop$', () => {
             hungerValues.push(hunger)
         })
 
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+        tick()
 
         subscription.unsubscribe()
 
@@ -63,7 +70,7 @@ describe('feedLoop$', () => {
         })
 
         new Array(110).fill('').forEach(() => {
-            ;(tick$ as unknown as Subject<void>).next()
+            tick()
         })
 
         await new Promise((resolve) => setTimeout(resolve, 100))
@@ -101,7 +108,7 @@ describe('feedLoop$', () => {
         expect(hungerValues[hungerValues.length - 1]).toEqual(
             animal.initialHungerPercent! - BASE_REPLENISH
         )
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
         subscription.unsubscribe()
         expect(hungerValues[hungerValues.length - 1]).toEqual(
             animal.initialHungerPercent! - BASE_REPLENISH + 0.5

@@ -2,6 +2,13 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { Subject, BehaviorSubject } from 'rxjs'
 import { happinessLoop$, BASE_REPLENISH, tick$ } from './observables'
 import { Animal, Species } from '../types/animals'
+import { isSubject } from '../types/tests.ts'
+
+const tick = () => {
+    if (isSubject(tick$)) {
+        return tick$.next()
+    }
+}
 
 const createMockAnimal = ({
     initialSleepinessPercent,
@@ -69,8 +76,8 @@ describe('happinessLoop$', () => {
             sleep$
         ).subscribe((happiness) => happinessValues.push(happiness))
 
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+        tick()
 
         subscription.unsubscribe()
 
@@ -89,13 +96,13 @@ describe('happinessLoop$', () => {
 
         hunger$.next(30)
         sleep$.next(30)
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+        tick()
 
         hunger$.next(30)
         sleep$.next(75)
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+        tick()
 
         subscription.unsubscribe()
 
@@ -119,12 +126,12 @@ describe('happinessLoop$', () => {
 
         hunger$.next(30)
         sleep$.next(30)
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+        tick()
 
         hunger$.next(75)
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+        tick()
 
         subscription.unsubscribe()
 
@@ -148,15 +155,15 @@ describe('happinessLoop$', () => {
 
         hunger$.next(30)
         sleep$.next(30)
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+        tick()
 
         const diffBefore = happinessValues[0] - happinessValues[1]
 
         hunger$.next(30)
         sleep$.next(75)
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+        tick()
 
         const diffAfterOneTipping =
             happinessValues[happinessValues.length - 2] -
@@ -164,8 +171,8 @@ describe('happinessLoop$', () => {
 
         hunger$.next(75)
         sleep$.next(75)
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
+        tick()
 
         const diffAfterBothTipping =
             happinessValues[happinessValues.length - 2] -
@@ -204,9 +211,9 @@ describe('happinessLoop$', () => {
             sleep$
         ).subscribe((happiness) => happinessValues.push(happiness))
 
-        new Array(15)
-            .fill('')
-            .forEach(() => (tick$ as unknown as Subject<void>).next())
+        new Array(15).fill('').forEach(() => {
+            return tick()
+        })
 
         subscription.unsubscribe()
 
@@ -228,7 +235,7 @@ describe('happinessLoop$', () => {
         expect(happinessValues[happinessValues.length - 1]).toEqual(
             animal.initialHappinessPercent! + BASE_REPLENISH
         )
-        ;(tick$ as unknown as Subject<void>).next()
+        tick()
         subscription.unsubscribe()
 
         expect(happinessValues[happinessValues.length - 1]).toEqual(
