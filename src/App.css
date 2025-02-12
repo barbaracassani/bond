@@ -3,7 +3,6 @@
     font-weight: 400;
     font-style: normal;
     line-height: 1.5;
-    font-weight: 400;
 
     color-scheme: light dark;
     color: rgba(255, 255, 255, 0.87);
@@ -13,6 +12,8 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    --alarm-red: #c8455d;
 }
 
 a {
@@ -160,12 +161,12 @@ button:focus-visible {
 }
 
 .remove-button:hover {
-    background-color: #a13247;
+    background-color: var(--alarm-red);
 }
 
 .remove-button:focus {
     outline: none;
-    box-shadow: 0 0 5px #a13247;
+    box-shadow: 0 0 5px var(--alarm-red);
 }
 
 .meter {
@@ -183,8 +184,18 @@ button:focus-visible {
     transition: width 0.3s ease;
 }
 
-.meter-fill.alarm {
-    background-color: #c8455d;
+.meter-fill.alarm:not(.happiness) {
+    background-color: var(--alarm-red);
+}
+
+.meter.alarm.happiness {
+    background-image: repeating-linear-gradient(
+        45deg,
+        white 0px,
+        white 5px,
+        var(--alarm-red) 5px,
+        var(--alarm-red) 10px
+    );
 }
 
 .action-button {

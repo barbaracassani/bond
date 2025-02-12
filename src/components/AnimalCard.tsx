@@ -50,9 +50,11 @@ const AnimalCard: FC<{ animal: Animal; removeHandler: () => void }> = ({
                     <strong>
                         <span>Happiness:</span> {happiness.toFixed(2)}
                     </strong>
-                    <div className="meter">
+                    <div
+                        className={`meter happiness${happiness < 10 ? ' alarm' : ''}`}
+                    >
                         <div
-                            className={`meter-fill${happiness < 10 ? ' alarm' : ''}`}
+                            className="meter-fill"
                             style={{ width: `${happiness}%` }}
                         ></div>
                     </div>
