@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { Subject } from 'rxjs'
+import { describe, expect, it, beforeEach } from 'vitest'
+import { Subject, BehaviorSubject } from 'rxjs'
 import { happinessLoop$, BASE_REPLENISH, tick$ } from './observables'
 import { Animal, Species } from '../types/animals'
 
@@ -36,183 +36,201 @@ const createMockAnimal = ({
 })
 
 describe('happinessLoop$', () => {
+    let hunger$: BehaviorSubject<number>
+    let sleep$: BehaviorSubject<number>
+
+    beforeEach(() => {
+        hunger$ = new BehaviorSubject(50)
+        sleep$ = new BehaviorSubject(50)
+    })
+
     it('should start from the baseline', async () => {
         const animal = createMockAnimal({ initialHappinessPercent: 30 })
         const happinessValues: number[] = []
 
-        const subscription = happinessLoop$(animal as Animal).subscribe(
-            (happiness) => {
-                happinessValues.push(happiness)
-            }
-        )
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        const subscription = happinessLoop$(
+            animal as Animal,
+            hunger$,
+            sleep$
+        ).subscribe((happiness) => happinessValues.push(happiness))
 
         subscription.unsubscribe()
 
         expect(happinessValues).toEqual([30])
     })
+
     it('should decrease happiness over time', async () => {
         const animal = createMockAnimal({})
         const happinessValues: number[] = []
 
-        const subscription = happinessLoop$(animal as Animal).subscribe(
-            (happiness) => {
-                happinessValues.push(happiness)
-            }
-        )
+        const subscription = happinessLoop$(
+            animal as Animal,
+            hunger$,
+            sleep$
+        ).subscribe((happiness) => happinessValues.push(happiness))
 
         ;(tick$ as unknown as Subject<void>).next()
         ;(tick$ as unknown as Subject<void>).next()
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
 
         subscription.unsubscribe()
 
         expect(happinessValues).toEqual([50, 49.5, 49])
     })
+
     it('should decrease faster if sleepiness is above 70', async () => {
-        const animal = createMockAnimal({
-            initialSleepinessPercent: 69,
-        })
+        const animal = createMockAnimal({})
         const happinessValues: number[] = []
 
-        const subscription = happinessLoop$(animal as Animal).subscribe(
-            (happiness) => {
-                happinessValues.push(happiness)
-            }
-        )
+        const subscription = happinessLoop$(
+            animal as Animal,
+            hunger$,
+            sleep$
+        ).subscribe((happiness) => happinessValues.push(happiness))
 
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        hunger$.next(30)
+        sleep$.next(30)
         ;(tick$ as unknown as Subject<void>).next()
         ;(tick$ as unknown as Subject<void>).next()
 
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        hunger$.next(30)
+        sleep$.next(75)
+        ;(tick$ as unknown as Subject<void>).next()
+        ;(tick$ as unknown as Subject<void>).next()
 
         subscription.unsubscribe()
-        const diffBeforeTipping = happinessValues[0] - happinessValues[1]
-        const diffAfterTipping =
+
+        const diffBefore = happinessValues[0] - happinessValues[1]
+        const diffAfter =
             happinessValues[happinessValues.length - 2] -
             happinessValues[happinessValues.length - 1]
-        expect(diffAfterTipping).toBeGreaterThan(diffBeforeTipping)
+
+        expect(diffAfter).toBeGreaterThan(diffBefore)
     })
+
     it('should decrease faster if hunger is above 70', async () => {
-        const animal = createMockAnimal({
-            initialHungerPercent: 69,
-        })
+        const animal = createMockAnimal({})
         const happinessValues: number[] = []
 
-        const subscription = happinessLoop$(animal as Animal).subscribe(
-            (happiness) => {
-                happinessValues.push(happiness)
-            }
-        )
+        const subscription = happinessLoop$(
+            animal as Animal,
+            hunger$,
+            sleep$
+        ).subscribe((happiness) => happinessValues.push(happiness))
 
-        ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+        hunger$.next(30)
+        sleep$.next(30)
         ;(tick$ as unknown as Subject<void>).next()
         ;(tick$ as unknown as Subject<void>).next()
 
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        hunger$.next(75)
+        ;(tick$ as unknown as Subject<void>).next()
+        ;(tick$ as unknown as Subject<void>).next()
 
         subscription.unsubscribe()
-        const diffBeforeTipping = happinessValues[0] - happinessValues[1]
-        const diffAfterTipping =
+
+        const diffBefore = happinessValues[0] - happinessValues[1]
+        const diffAfter =
             happinessValues[happinessValues.length - 2] -
             happinessValues[happinessValues.length - 1]
-        expect(diffAfterTipping).toBeGreaterThan(diffBeforeTipping)
+
+        expect(diffAfter).toBeGreaterThan(diffBefore)
     })
-    it('should decrease even faster if hunger and sleep are above 70', async () => {
-        const animal = createMockAnimal({
-            initialHungerPercent: 69,
-            initialSleepinessPercent: 68,
-        })
+
+    it('should decrease even faster if hunger and sleep are both above 70', async () => {
+        const animal = createMockAnimal({})
         const happinessValues: number[] = []
 
-        const subscription = happinessLoop$(animal as Animal).subscribe(
-            (happiness) => {
-                happinessValues.push(happiness)
-            }
-        )
+        const subscription = happinessLoop$(
+            animal as Animal,
+            hunger$,
+            sleep$
+        ).subscribe((happiness) => happinessValues.push(happiness))
 
+        hunger$.next(30)
+        sleep$.next(30)
         ;(tick$ as unknown as Subject<void>).next()
         ;(tick$ as unknown as Subject<void>).next()
+
+        const diffBefore = happinessValues[0] - happinessValues[1]
+
+        hunger$.next(30)
+        sleep$.next(75)
+        ;(tick$ as unknown as Subject<void>).next()
         ;(tick$ as unknown as Subject<void>).next()
 
-        await new Promise((resolve) => setTimeout(resolve, 100))
-
-        const diffBeforeTippingHunger = happinessValues[0] - happinessValues[1]
-        const diffAfterTippingHunger =
+        const diffAfterOneTipping =
             happinessValues[happinessValues.length - 2] -
             happinessValues[happinessValues.length - 1]
 
-        expect(diffAfterTippingHunger).toBeGreaterThan(diffBeforeTippingHunger)
+        hunger$.next(75)
+        sleep$.next(75)
         ;(tick$ as unknown as Subject<void>).next()
         ;(tick$ as unknown as Subject<void>).next()
-        ;(tick$ as unknown as Subject<void>).next()
+
+        const diffAfterBothTipping =
+            happinessValues[happinessValues.length - 2] -
+            happinessValues[happinessValues.length - 1]
+
         subscription.unsubscribe()
-        const diffAfterTippingBoth =
-            happinessValues[happinessValues.length - 2] -
-            happinessValues[happinessValues.length - 1]
-        expect(diffAfterTippingBoth).toBeGreaterThan(diffAfterTippingHunger)
+
+        expect(diffAfterOneTipping).toBeGreaterThan(diffBefore)
+        expect(diffAfterBothTipping).toBeGreaterThan(diffAfterOneTipping)
     })
+
     it('should not increase beyond 100', async () => {
         const animal = createMockAnimal({})
         const happinessValues: number[] = []
 
-        const subscription = happinessLoop$(animal as Animal).subscribe(
-            (happiness) => {
-                happinessValues.push(happiness)
-            }
-        )
+        const subscription = happinessLoop$(
+            animal as Animal,
+            hunger$,
+            sleep$
+        ).subscribe((happiness) => happinessValues.push(happiness))
 
-        new Array(30).fill('').forEach(() => {
-            ;(animal.happiness$ as Subject<void>).next()
-        })
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        new Array(30).fill('').forEach(() => animal.happiness$!.next())
 
         subscription.unsubscribe()
+
         expect(happinessValues[happinessValues.length - 1]).toEqual(100)
     })
+
     it('should not decrease past 0', async () => {
         const animal = createMockAnimal({ initialHappinessPercent: 5 })
         const happinessValues: number[] = []
 
-        const subscription = happinessLoop$(animal as Animal).subscribe(
-            (happiness) => {
-                happinessValues.push(happiness)
-            }
-        )
-        new Array(15).fill('').forEach(() => {
-            ;(tick$ as unknown as Subject<void>).next()
-        })
+        const subscription = happinessLoop$(
+            animal as Animal,
+            hunger$,
+            sleep$
+        ).subscribe((happiness) => happinessValues.push(happiness))
 
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        new Array(15)
+            .fill('')
+            .forEach(() => (tick$ as unknown as Subject<void>).next())
 
         subscription.unsubscribe()
+
         expect(happinessValues[happinessValues.length - 1]).toEqual(0)
     })
+
     it('should increase happiness when replenished', async () => {
         const animal = createMockAnimal({})
         const happinessValues: number[] = []
 
-        const subscription = happinessLoop$(animal as Animal).subscribe(
-            (happiness) => {
-                happinessValues.push(happiness)
-            }
-        )
+        const subscription = happinessLoop$(
+            animal as Animal,
+            hunger$,
+            sleep$
+        ).subscribe((happiness) => happinessValues.push(happiness))
 
         animal.happiness$!.next()
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
 
         expect(happinessValues[happinessValues.length - 1]).toEqual(
             animal.initialHappinessPercent! + BASE_REPLENISH
         )
         ;(tick$ as unknown as Subject<void>).next()
         subscription.unsubscribe()
+
         expect(happinessValues[happinessValues.length - 1]).toEqual(
             animal.initialHappinessPercent! + BASE_REPLENISH - 0.5
         )

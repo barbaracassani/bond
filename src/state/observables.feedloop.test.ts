@@ -34,8 +34,6 @@ describe('feedLoop$', () => {
             hungerValues.push(hunger)
         })
 
-        await new Promise((resolve) => setTimeout(resolve, 100))
-
         subscription.unsubscribe()
 
         expect(hungerValues).toEqual([50])
@@ -50,8 +48,6 @@ describe('feedLoop$', () => {
 
         ;(tick$ as unknown as Subject<void>).next()
         ;(tick$ as unknown as Subject<void>).next()
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
 
         subscription.unsubscribe()
 
@@ -82,14 +78,12 @@ describe('feedLoop$', () => {
         const subscription = feedLoop$(animal as Animal).subscribe((hunger) => {
             hungerValues.push(hunger)
         })
-        animal.feed$!.next();
-        animal.feed$!.next();
-        animal.feed$!.next();
-        animal.feed$!.next();
-        animal.feed$!.next();
-        animal.feed$!.next();
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        animal.feed$!.next()
+        animal.feed$!.next()
+        animal.feed$!.next()
+        animal.feed$!.next()
+        animal.feed$!.next()
+        animal.feed$!.next()
 
         subscription.unsubscribe()
         expect(hungerValues[hungerValues.length - 1]).toEqual(0)
@@ -103,8 +97,6 @@ describe('feedLoop$', () => {
         })
 
         animal.feed$!.next()
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
 
         expect(hungerValues[hungerValues.length - 1]).toEqual(
             animal.initialHungerPercent! - BASE_REPLENISH

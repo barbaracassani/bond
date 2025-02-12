@@ -1,4 +1,4 @@
-import {interval, merge, Observable, Subject, withLatestFrom} from 'rxjs'
+import { interval, merge, Observable, Subject, withLatestFrom } from 'rxjs'
 import { Animal } from '../types/animals.ts'
 import { map, scan, startWith } from 'rxjs/operators'
 import {
@@ -14,7 +14,9 @@ export const BASE_REPLENISH = 25
 export const ACCELLERATED_DECAY_FROM = 70
 
 export const tick$ =
-    import.meta.env.MODE === 'test' ? new Subject<number>() : interval(TIME_TICK)
+    import.meta.env.MODE === 'test'
+        ? new Subject<number>()
+        : interval(TIME_TICK)
 
 export const feedLoop$ = (animal: Animal): Observable<number> => {
     return merge(
@@ -42,10 +44,14 @@ export const sleepLoop$ = (animal: Animal): Observable<number> => {
     )
 }
 
-export const happinessLoop$ = (animal: Animal): Observable<number> => {
+export const happinessLoop$ = (
+    animal: Animal,
+    hunger$: Observable<number>,
+    sleep$: Observable<number>
+): Observable<number> => {
     return merge(
         tick$.pipe(
-            withLatestFrom(feedLoop$(animal), sleepLoop$(animal)),
+            withLatestFrom(hunger$, sleep$),
             map(([, hunger, sleep]) => {
                 const decay = calculateHappinessDecay(animal, hunger, sleep)
                 return -decay

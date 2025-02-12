@@ -5,10 +5,10 @@ import { Animal, Species } from '../types/animals'
 
 const createMockAnimal = (): Partial<
     Omit<Animal, 'feed$' | 'sleep$' | 'happiness$'> & {
-    feed$: Subject<void>
-    sleep$: Subject<void>
-    happiness$: Subject<void>
-}
+        feed$: Subject<void>
+        sleep$: Subject<void>
+        happiness$: Subject<void>
+    }
 > => ({
     id: '1',
     name: 'TestAnimal',
@@ -30,11 +30,11 @@ describe('sleepLoop$', () => {
         const animal = createMockAnimal()
         const tirednessValues: number[] = []
 
-        const subscription = sleepLoop$(animal as Animal).subscribe((tiredness) => {
-            tirednessValues.push(tiredness)
-        })
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        const subscription = sleepLoop$(animal as Animal).subscribe(
+            (tiredness) => {
+                tirednessValues.push(tiredness)
+            }
+        )
 
         subscription.unsubscribe()
 
@@ -44,14 +44,14 @@ describe('sleepLoop$', () => {
         const animal = createMockAnimal()
         const tirednessValues: number[] = []
 
-        const subscription = sleepLoop$(animal as Animal).subscribe((tiredness) => {
+        const subscription = sleepLoop$(animal as Animal).subscribe(
+            (tiredness) => {
                 tirednessValues.push(tiredness)
-            })
+            }
+        )
 
         ;(tick$ as unknown as Subject<void>).next()
         ;(tick$ as unknown as Subject<void>).next()
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
 
         subscription.unsubscribe()
 
@@ -61,15 +61,15 @@ describe('sleepLoop$', () => {
         const animal = createMockAnimal()
         const tirednessValues: number[] = []
 
-        const subscription = sleepLoop$(animal as Animal).subscribe((tiredness) => {
-            tirednessValues.push(tiredness)
-        })
+        const subscription = sleepLoop$(animal as Animal).subscribe(
+            (tiredness) => {
+                tirednessValues.push(tiredness)
+            }
+        )
 
         new Array(110).fill('').forEach(() => {
             ;(tick$ as unknown as Subject<void>).next()
         })
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
 
         subscription.unsubscribe()
         expect(tirednessValues[tirednessValues.length - 1]).toEqual(100)
@@ -78,17 +78,17 @@ describe('sleepLoop$', () => {
         const animal = createMockAnimal()
         const tirednessValues: number[] = []
 
-        const subscription = sleepLoop$(animal as Animal).subscribe((tiredness) => {
-            tirednessValues.push(tiredness)
-        })
-        animal.sleep$!.next();
-        animal.sleep$!.next();
-        animal.sleep$!.next();
-        animal.sleep$!.next();
-        animal.sleep$!.next();
-        animal.sleep$!.next();
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        const subscription = sleepLoop$(animal as Animal).subscribe(
+            (tiredness) => {
+                tirednessValues.push(tiredness)
+            }
+        )
+        animal.sleep$!.next()
+        animal.sleep$!.next()
+        animal.sleep$!.next()
+        animal.sleep$!.next()
+        animal.sleep$!.next()
+        animal.sleep$!.next()
 
         subscription.unsubscribe()
         expect(tirednessValues[tirednessValues.length - 1]).toEqual(0)
@@ -97,13 +97,13 @@ describe('sleepLoop$', () => {
         const animal = createMockAnimal()
         const tirednessValues: number[] = []
 
-        const subscription = sleepLoop$(animal as Animal).subscribe((tiredness) => {
-            tirednessValues.push(tiredness)
-        })
+        const subscription = sleepLoop$(animal as Animal).subscribe(
+            (tiredness) => {
+                tirednessValues.push(tiredness)
+            }
+        )
 
         animal.sleep$!.next()
-
-        await new Promise((resolve) => setTimeout(resolve, 100))
 
         expect(tirednessValues[tirednessValues.length - 1]).toEqual(
             animal.initialSleepinessPercent! - BASE_REPLENISH
