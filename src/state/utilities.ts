@@ -1,4 +1,4 @@
-import { Animal, Rates, Species } from '../types/animals.ts'
+import { Animal, Rates, ReplenishAction, Species } from '../types/animals.ts'
 import { createSignal } from '@react-rxjs/utils'
 
 const rates: Record<Species, Rates> = {
@@ -27,9 +27,7 @@ export const createAnimal = ({
     name,
     id,
 }: Pick<Animal, 'name' | 'id' | 'species'>): Animal => {
-    const [feed$, feed] = createSignal<void>()
-    const [sleep$, rest] = createSignal<void>()
-    const [happiness$, makeHappy] = createSignal<void>()
+    const [replenish$, makeReplenish] = createSignal<ReplenishAction>()
     return {
         id,
         name,
@@ -38,11 +36,7 @@ export const createAnimal = ({
         initialSleepinessPercent: 50,
         initialHappinessPercent: 50,
         initialHungerPercent: 50,
-        feed$,
-        feed,
-        sleep$,
-        rest,
-        happiness$,
-        makeHappy,
+        replenish$,
+        makeReplenish,
     }
 }

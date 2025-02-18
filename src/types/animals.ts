@@ -13,6 +13,12 @@ export type Rates = {
     readonly acceleratedDecayFactor: number
 }
 
+export enum ReplenishAction {
+    'feed' = 'feed',
+    'makeHappy' = 'makeHappy',
+    'sleep' = 'sleep',
+}
+
 export type Animal = {
     id: string
     name: string
@@ -24,10 +30,6 @@ export type Animal = {
 
     rates: Rates
 
-    readonly feed$: Observable<void>
-    readonly feed: () => void
-    readonly sleep$: Observable<void>
-    readonly rest: () => void
-    readonly happiness$: Observable<void>
-    readonly makeHappy: () => void
+    readonly replenish$: Observable<ReplenishAction>
+    readonly makeReplenish: (key: ReplenishAction) => void
 }

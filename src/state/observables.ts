@@ -1,13 +1,6 @@
-import {
-    combineLatest,
-    interval,
-    merge,
-    Observable,
-    Subject,
-    withLatestFrom,
-} from 'rxjs'
-import { Animal } from '../types/animals.ts'
-import { map, scan, startWith } from 'rxjs/operators'
+import { interval, merge, Observable, share, Subject } from 'rxjs'
+import { Animal, ReplenishAction } from '../types/animals.ts'
+import { scan, startWith } from 'rxjs/operators'
 import {
     calculateFeedDecay,
     calculateHappinessDecay,
@@ -18,69 +11,91 @@ const TIME_TICK = 3000
 
 export const BASE_DECAY_PER_INTERVAL = 5
 export const BASE_REPLENISH = 25
-export const ACCELLERATED_DECAY_FROM = 70
+export const ACCELERATED_DECAY_FROM = 70
 
 export const tick$ =
     import.meta.env.MODE === 'test'
         ? new Subject<number>()
-        : interval(TIME_TICK)
+        : interval(TIME_TICK).pipe(share())
 
-export const feedLoop$ = (animal: Animal): Observable<number> => {
-    return merge(
-        tick$.pipe(map(() => calculateFeedDecay(animal))),
-        animal.feed$.pipe(map(() => -BASE_REPLENISH))
-    ).pipe(
-        scan(
-            (level, change) => Math.min(100, Math.max(0, level + change)),
-            animal.initialHungerPercent
-        ),
-        startWith(animal.initialHungerPercent)
-    )
-}
-
-export const sleepLoop$ = (animal: Animal): Observable<number> => {
-    return merge(
-        tick$.pipe(map(() => calculateRestDecay(animal))),
-        animal.sleep$.pipe(map(() => -BASE_REPLENISH))
-    ).pipe(
-        scan(
-            (level, change) => Math.min(100, Math.max(0, level + change)),
-            animal.initialSleepinessPercent
-        ),
-        startWith(animal.initialSleepinessPercent)
-    )
-}
-
-export const happinessLoop$ = (
+const updateHunger = (
     animal: Animal,
-    hunger$: Observable<number>,
-    sleep$: Observable<number>
-): Observable<number> => {
-    return merge(
-        tick$.pipe(
-            withLatestFrom(hunger$, sleep$),
-            map(([, hunger, sleep]) => {
-                const decay = calculateHappinessDecay(animal, hunger, sleep)
-                return -decay
-            })
-        ),
-        animal.happiness$.pipe(map(() => BASE_REPLENISH))
-    ).pipe(
-        scan(
-            (level, change) => Math.min(100, Math.max(0, level + change)),
-            animal.initialHappinessPercent
-        ),
-        startWith(animal.initialHappinessPercent)
-    )
+    previous: number,
+    event: number | ReplenishAction
+) => {
+    if (
+        event === ReplenishAction.makeHappy ||
+        event === ReplenishAction.sleep
+    ) {
+        return previous
+    }
+    const hungerChange =
+        typeof event === 'number' ? calculateFeedDecay(animal) : -BASE_REPLENISH
+    return Math.min(100, Math.max(0, previous + hungerChange))
 }
 
-export const combinedLoop$ = (animal: Animal) => {
-    const hunger$ = feedLoop$(animal)
-    const sleep$ = sleepLoop$(animal)
-    const happiness$ = happinessLoop$(animal, hunger$, sleep$)
-    // note of the author: it should be possible to subscribe to tick$ here instead of inside the single observables
-    // This would reduce the number of emissions and therefore the performance.
-    return combineLatest([hunger$, sleep$, happiness$]).pipe(
-        map(([hunger, sleep, happiness]) => ({ hunger, sleep, happiness }))
+const updateSleep = (
+    animal: Animal,
+    previous: number,
+    event: number | ReplenishAction
+) => {
+    if (event === ReplenishAction.makeHappy || event === ReplenishAction.feed) {
+        return previous
+    }
+    const sleepChange =
+        typeof event === 'number' ? calculateRestDecay(animal) : -BASE_REPLENISH
+    return Math.min(100, Math.max(0, previous + sleepChange))
+}
+
+const updateHappiness = (
+    animal: Animal,
+    previous: number,
+    event: number | ReplenishAction,
+    hunger: number,
+    sleep: number
+) => {
+    if (event === ReplenishAction.sleep || event === ReplenishAction.feed) {
+        return previous
+    }
+    const happinessChange =
+        typeof event === 'number'
+            ? -calculateHappinessDecay(animal, hunger, sleep)
+            : BASE_REPLENISH
+    return Math.min(100, Math.max(0, previous + happinessChange))
+}
+
+export const combinedLoop$ = (
+    animal: Animal
+): Observable<{ hunger: number; sleep: number; happiness: number }> => {
+    return merge(tick$, animal.replenish$).pipe(
+        scan(
+            (state, event) => {
+                const newSleep = updateSleep(animal, state.sleep, event)
+                const newHunger = updateHunger(animal, state.hunger, event)
+                // todo too many params!
+                const newHappiness = updateHappiness(
+                    animal,
+                    state.happiness,
+                    event,
+                    state.hunger,
+                    state.sleep
+                )
+                return {
+                    hunger: newHunger,
+                    sleep: newSleep,
+                    happiness: newHappiness,
+                }
+            },
+            {
+                hunger: animal.initialHungerPercent,
+                sleep: animal.initialSleepinessPercent,
+                happiness: animal.initialHappinessPercent,
+            }
+        ),
+        startWith({
+            hunger: animal.initialHungerPercent,
+            sleep: animal.initialSleepinessPercent,
+            happiness: animal.initialHappinessPercent,
+        })
     )
 }

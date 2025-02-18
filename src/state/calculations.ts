@@ -1,6 +1,6 @@
 import { Animal } from '../types/animals.ts'
 import {
-    ACCELLERATED_DECAY_FROM,
+    ACCELERATED_DECAY_FROM,
     BASE_DECAY_PER_INTERVAL,
 } from './observables.ts'
 
@@ -17,11 +17,11 @@ export const calculateHappinessDecay = (
     sleep: number
 ): number => {
     const hungerFactor =
-        hunger >= ACCELLERATED_DECAY_FROM
+        hunger >= ACCELERATED_DECAY_FROM
             ? animal.rates.acceleratedDecayFactor
             : 1
     const sleepFactor =
-        sleep >= ACCELLERATED_DECAY_FROM
+        sleep >= ACCELERATED_DECAY_FROM
             ? animal.rates.acceleratedDecayFactor
             : 1
     return (
