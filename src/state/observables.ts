@@ -1,4 +1,4 @@
-import { interval, mapTo, merge, Observable, share, Subject } from 'rxjs'
+import {interval, mapTo, merge, Observable, share, Subject, tap} from 'rxjs'
 import { Animal, DepletingAction, ReplenishAction } from '../types/animals.ts'
 import { scan, startWith } from 'rxjs/operators'
 import {
@@ -15,13 +15,17 @@ export const ACCELERATED_DECAY_FROM = 70
 
 export const tick$ =
     import.meta.env.MODE === 'test'
-        ? new Subject<DepletingAction.time>()
+        ? new Subject<DepletingAction>()
         : interval(TIME_TICK).pipe(mapTo(DepletingAction.time), share())
 
 export const combinedLoop$ = (
     animal: Animal
 ): Observable<{ hunger: number; sleep: number; happiness: number }> => {
+    console.info('called time!!!!')
     return merge(tick$, animal.replenish$).pipe(
+        tap((a) => {
+            console.info('tapping time!!!!', a)
+        }),
         scan(
             (state, event) => {
                 const stateCopy = { ...state }
