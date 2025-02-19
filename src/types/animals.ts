@@ -19,6 +19,10 @@ export enum ReplenishAction {
     'sleep' = 'sleep',
 }
 
+export enum DepletingAction {
+    'time' = 'time',
+}
+
 export type Animal = {
     id: string
     name: string

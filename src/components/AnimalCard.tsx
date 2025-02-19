@@ -35,18 +35,21 @@ const AnimalCard: FC<{ animal: Animal; removeHandler: () => void }> = ({
             <div className="animal-stats">
                 <AnimalStat
                     animal={animal}
+                    actionLabel="Feed"
                     parameter={hunger}
                     parameterName="Hunger"
                     action={ReplenishAction.feed}
                 />
                 <AnimalStat
                     animal={animal}
+                    actionLabel="Rest"
                     parameter={sleep}
                     parameterName="Sleep"
                     action={ReplenishAction.sleep}
                 />
                 <AnimalStat
                     animal={animal}
+                    actionLabel="Play"
                     parameter={happiness}
                     parameterName="Happiness"
                     action={ReplenishAction.makeHappy}
